@@ -4,9 +4,10 @@ import path from 'path';
 import pdf from 'pdf-parse';
 import { PDF } from '../models/PDF';
 import { generateEmbeddings, chunkText } from '../config/gemini';
+import { AuthenticatedRequest } from '../types';
 
 // Upload and process PDF
-export const uploadPDF = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const uploadPDF = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     if (!req.file) {
       res.status(400).json({
@@ -54,6 +55,7 @@ export const uploadPDF = async (req: Request, res: Response, next: NextFunction)
       fileSize: size,
       totalChunks: chunks.length,
       chunks: chunksWithEmbeddings,
+      userId: req.user?.id, // Associate with authenticated user
       metadata
     });
 
@@ -87,9 +89,12 @@ export const uploadPDF = async (req: Request, res: Response, next: NextFunction)
 };
 
 // Get all PDFs
-export const getPDFs = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getPDFs = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const pdfs = await PDF.find({}, {
+    // If user is authenticated, show only their PDFs, otherwise show all
+    const filter = req.user ? { userId: req.user.id } : {};
+    
+    const pdfs = await PDF.find(filter, {
       chunks: 0 // Exclude chunks to reduce response size
     }).sort({ uploadDate: -1 });
 
@@ -104,7 +109,7 @@ export const getPDFs = async (req: Request, res: Response, next: NextFunction): 
 };
 
 // Get PDF by ID
-export const getPDFById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getPDFById = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const pdf = await PDF.findById(req.params.id, {
       chunks: 0 // Exclude chunks to reduce response size
@@ -114,6 +119,15 @@ export const getPDFById = async (req: Request, res: Response, next: NextFunction
       res.status(404).json({
         success: false,
         error: 'PDF not found'
+      });
+      return;
+    }
+
+    // If user is authenticated, only allow access to their own PDFs
+    if (req.user && pdf.userId && pdf.userId !== req.user.id) {
+      res.status(403).json({
+        success: false,
+        error: 'Access denied - PDF belongs to another user'
       });
       return;
     }
@@ -128,7 +142,7 @@ export const getPDFById = async (req: Request, res: Response, next: NextFunction
 };
 
 // Delete PDF
-export const deletePDF = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deletePDF = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const pdf = await PDF.findById(req.params.id);
 
@@ -136,6 +150,15 @@ export const deletePDF = async (req: Request, res: Response, next: NextFunction)
       res.status(404).json({
         success: false,
         error: 'PDF not found'
+      });
+      return;
+    }
+
+    // Only allow users to delete their own PDFs
+    if (pdf.userId && pdf.userId !== req.user!.id) {
+      res.status(403).json({
+        success: false,
+        error: 'Access denied - PDF belongs to another user'
       });
       return;
     }

@@ -48,7 +48,7 @@ export function PDFList({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 sm:space-y-3">
       {pdfs.map((pdf: PDFDocument) => {
         const isSelected = selectedPDF?._id === pdf._id;
         const isDeleting = deletingId === pdf._id;
@@ -56,7 +56,7 @@ export function PDFList({
         return (
           <div
             key={pdf._id}
-            className={`group relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer hover:shadow-md ${
+            className={`group relative p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 cursor-pointer hover:shadow-md ${
               isSelected 
                 ? 'border-blue-500 bg-blue-50 shadow-md' 
                 : 'border-gray-200 bg-white hover:border-gray-300'
@@ -65,25 +65,25 @@ export function PDFList({
           >
             {/* Selection Indicator */}
             {isSelected && (
-              <div className="absolute top-3 right-3 w-3 h-3 bg-blue-500 rounded-full"></div>
+              <div className="absolute top-2 sm:top-3 right-2 sm:right-3 w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full"></div>
             )}
 
             {/* PDF Content */}
-            <div className="flex items-start space-x-3">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+            <div className="flex items-start space-x-2 sm:space-x-3">
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                 isSelected 
                   ? 'bg-blue-500 text-white' 
                   : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
               }`}>
-                <FileText className="w-5 h-5" />
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-900 mb-1 truncate">
+                <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-1 truncate">
                   {pdf.originalName}
                 </h3>
                 
-                <div className="flex items-center space-x-4 text-sm text-gray-500 mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-500 mb-2">
                   <div className="flex items-center space-x-1">
                     <HardDrive className="w-3 h-3" />
                     <span>{formatFileSize(pdf.fileSize)}</span>
@@ -94,13 +94,14 @@ export function PDFList({
                   </div>
                   <div className="flex items-center space-x-1">
                     <Calendar className="w-3 h-3" />
-                    <span>{formatDate(pdf.uploadDate)}</span>
+                    <span className="hidden sm:inline">{formatDate(pdf.uploadDate)}</span>
+                    <span className="sm:hidden">{new Date(pdf.uploadDate).toLocaleDateString()}</span>
                   </div>
                 </div>
 
                 {/* Metadata */}
                 {pdf.metadata && (pdf.metadata.title || pdf.metadata.author) && (
-                  <div className="text-xs text-gray-400 space-y-1">
+                  <div className="text-xs text-gray-400 space-y-1 hidden sm:block">
                     {pdf.metadata.title && (
                       <div className="truncate">Title: {pdf.metadata.title}</div>
                     )}
@@ -113,17 +114,17 @@ export function PDFList({
             </div>
 
             {/* Action Buttons */}
-            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="absolute top-2 sm:top-3 right-2 sm:right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <div className="flex items-center space-x-1">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelectPDF(pdf);
                   }}
-                  className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                  className="p-1 sm:p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                   title="View PDF"
                 >
-                  <Eye className="w-4 h-4" />
+                  <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
                 <button
                   onClick={(e) => {
@@ -131,13 +132,13 @@ export function PDFList({
                     handleDelete(pdf._id);
                   }}
                   disabled={isDeleting}
-                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
+                  className="p-1 sm:p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
                   title="Delete PDF"
                 >
                   {isDeleting ? (
-                    <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
                   ) : (
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   )}
                 </button>
               </div>

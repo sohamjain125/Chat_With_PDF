@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { PDF } from '../models/PDF';
 import { Chat } from '../models/Chat';
 import { generateAnswer, generateEmbeddings } from '../config/gemini';
+import { AuthenticatedRequest } from '../types';
 
 // Calculate cosine similarity between two vectors
 const cosineSimilarity = (vecA: number[], vecB: number[]): number => {
@@ -44,7 +45,7 @@ const findRelevantChunks = async (query: string, pdfId: string, topK: number = 3
 };
 
 // Create new chat session
-export const createNewChat = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const createNewChat = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { pdfId } = req.body;
     
@@ -56,7 +57,7 @@ export const createNewChat = async (req: Request, res: Response, next: NextFunct
       return;
     }
     
-    // Verify PDF exists
+    // Verify PDF exists and user has access
     const pdf = await PDF.findById(pdfId);
     if (!pdf) {
       res.status(404).json({
@@ -66,9 +67,19 @@ export const createNewChat = async (req: Request, res: Response, next: NextFunct
       return;
     }
     
+    // Check if user has access to this PDF
+    if (pdf.userId && pdf.userId !== req.user!.id) {
+      res.status(403).json({
+        success: false,
+        error: 'Access denied - PDF belongs to another user'
+      });
+      return;
+    }
+    
     // Create new chat session
     const chat = new Chat({
       pdfId,
+      userId: req.user!.id,
       messages: []
     });
     
@@ -88,7 +99,7 @@ export const createNewChat = async (req: Request, res: Response, next: NextFunct
 };
 
 // Chat with PDF
-export const chatWithPDF = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const chatWithPDF = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { pdfId } = req.params;
     const { query, chatId } = req.body;
@@ -101,10 +112,38 @@ export const chatWithPDF = async (req: Request, res: Response, next: NextFunctio
       return;
     }
     
+    // Verify PDF exists and user has access
+    const pdf = await PDF.findById(pdfId);
+    if (!pdf) {
+      res.status(404).json({
+        success: false,
+        error: 'PDF not found'
+      });
+      return;
+    }
+    
+    // Check if user has access to this PDF
+    if (pdf.userId && pdf.userId !== req.user!.id) {
+      res.status(403).json({
+        success: false,
+        error: 'Access denied - PDF belongs to another user'
+      });
+      return;
+    }
+    
     // Find or create chat session
     let chat = chatId ? await Chat.findById(chatId) : null;
     if (!chat) {
-      chat = new Chat({ pdfId, messages: [] });
+      chat = new Chat({ pdfId, userId: req.user!.id, messages: [] });
+    }
+    
+    // Verify chat belongs to the user
+    if (chat.userId && chat.userId !== req.user!.id) {
+      res.status(403).json({
+        success: false,
+        error: 'Access denied - Chat belongs to another user'
+      });
+      return;
     }
     
     // Find relevant chunks
@@ -158,11 +197,34 @@ export const chatWithPDF = async (req: Request, res: Response, next: NextFunctio
 };
 
 // Get chat history for a PDF
-export const getChatHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getChatHistory = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { pdfId } = req.params;
     
-    const chats = await Chat.find({ pdfId })
+    // Verify PDF exists and user has access
+    const pdf = await PDF.findById(pdfId);
+    if (!pdf) {
+      res.status(404).json({
+        success: false,
+        error: 'PDF not found'
+      });
+      return;
+    }
+    
+    // Check if user has access to this PDF
+    if (pdf.userId && pdf.userId !== req.user!.id) {
+      res.status(403).json({
+        success: false,
+        error: 'Access denied - PDF belongs to another user'
+      });
+      return;
+    }
+    
+    // Get chats for this PDF and user
+    const chats = await Chat.find({ 
+      pdfId, 
+      userId: req.user!.id 
+    })
       .sort({ updatedAt: -1 })
       .limit(10); // Limit to last 10 chats
     

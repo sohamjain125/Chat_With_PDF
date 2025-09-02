@@ -9,12 +9,26 @@ import type {
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Add auth token to requests
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Request interceptor for logging
 api.interceptors.request.use(
@@ -47,7 +61,7 @@ export const pdfAPI = {
     const formData = new FormData();
     formData.append('pdf', file);
     
-    const response = await api.post<APIResponse<UploadResponse>>('/pdf/upload', formData, {
+    const response = await api.post<APIResponse<UploadResponse>>('/api/pdf/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -62,7 +76,7 @@ export const pdfAPI = {
 
   // Get all PDFs
   getAll: async (): Promise<PDFDocument[]> => {
-    const response = await api.get<APIResponse<PDFDocument[]>>('/pdf');
+    const response = await api.get<APIResponse<PDFDocument[]>>('/api/pdf');
     
     if (!response.data.success) {
       throw new Error(response.data.error || 'Failed to fetch PDFs');
@@ -73,7 +87,7 @@ export const pdfAPI = {
 
   // Get PDF by ID
   getById: async (id: string): Promise<PDFDocument> => {
-    const response = await api.get<APIResponse<PDFDocument>>(`/pdf/${id}`);
+    const response = await api.get<APIResponse<PDFDocument>>(`/api/pdf/${id}`);
     
     if (!response.data.success) {
       throw new Error(response.data.error || 'PDF not found');
@@ -96,7 +110,7 @@ export const pdfAPI = {
 export const chatAPI = {
   // Create new chat session
   createNew: async (pdfId: string): Promise<{ chatId: string; pdfId: string }> => {
-    const response = await api.post<APIResponse<{ chatId: string; pdfId: string }>>('/chat/new', {
+    const response = await api.post<APIResponse<{ chatId: string; pdfId: string }>>('/api/chat/new', {
       pdfId,
     });
     
@@ -109,7 +123,7 @@ export const chatAPI = {
 
   // Chat with PDF
   sendMessage: async (pdfId: string, query: string, chatId?: string): Promise<ChatResponse> => {
-    const response = await api.post<APIResponse<ChatResponse>>(`/chat/${pdfId}`, {
+    const response = await api.post<APIResponse<ChatResponse>>(`/api/chat/${pdfId}`, {
       query,
       chatId,
     });
@@ -123,13 +137,66 @@ export const chatAPI = {
 
   // Get chat history
   getHistory: async (pdfId: string): Promise<ChatSession[]> => {
-    const response = await api.get<APIResponse<ChatSession[]>>(`/chat/${pdfId}/history`);
+    const response = await api.get<APIResponse<ChatSession[]>>(`/api/chat/${pdfId}/history`);
     
     if (!response.data.success) {
       throw new Error(response.data.error || 'Failed to fetch chat history');
     }
     
     return response.data.data || [];
+  },
+};
+
+// Auth API endpoints
+export const authAPI = {
+  // Register user
+  register: async (name: string, email: string, password: string): Promise<{ user: any; token: string }> => {
+    const response = await api.post<APIResponse<{ user: any; token: string }>>('/api/auth/register', {
+      name,
+      email,
+      password,
+    });
+    
+    if (!response.data.success) {
+      throw new Error(response.data.error || 'Registration failed');
+    }
+    
+    return response.data.data!;
+  },
+
+  // Login user
+  login: async (email: string, password: string): Promise<{ user: any; token: string }> => {
+    const response = await api.post<APIResponse<{ user: any; token: string }>>('/api/auth/login', {
+      email,
+      password,
+    });
+    
+    if (!response.data.success) {
+      throw new Error(response.data.error || 'Login failed');
+    }
+    
+    return response.data.data!;
+  },
+
+  // Get current user
+  getCurrentUser: async (): Promise<any> => {
+    const response = await api.get<APIResponse<{ user: any }>>('/api/auth/me');
+    
+    if (!response.data.success) {
+      throw new Error(response.data.error || 'Failed to get user');
+    }
+    
+    return response.data.data!.user;
+  },
+
+  // Check auth status
+  checkStatus: async (): Promise<{ authenticated: boolean; user?: any }> => {
+    try {
+      const response = await api.get<APIResponse<{ authenticated: boolean; user?: any }>>('/api/auth/status');
+      return response.data.data!;
+    } catch (error) {
+      return { authenticated: false };
+    }
   },
 };
 

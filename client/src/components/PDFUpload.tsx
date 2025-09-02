@@ -79,12 +79,12 @@ export function PDFUpload({ onUploadSuccess, onUploadError }: PDFUploadProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Dropzone */}
       <div
         {...getRootProps()}
         className={`
-          border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
+          border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer transition-colors
           ${isDragActive && !isDragReject ? 'border-blue-400 bg-blue-50' : ''}
           ${isDragReject ? 'border-red-400 bg-red-50' : ''}
           ${!isDragActive && !isDragReject ? 'border-gray-300 hover:border-gray-400' : ''}
@@ -94,22 +94,22 @@ export function PDFUpload({ onUploadSuccess, onUploadError }: PDFUploadProps) {
         <input {...getInputProps()} />
         
         {uploadedFile ? (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center justify-center space-x-2 text-green-600">
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-medium">File selected</span>
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-sm sm:text-base font-medium">File selected</span>
             </div>
-            <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-              <FileText className="w-4 h-4" />
-              <span>{uploadedFile.name}</span>
+            <div className="flex items-center justify-center space-x-2 text-xs sm:text-sm text-gray-600">
+              <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="truncate max-w-[200px] sm:max-w-none">{uploadedFile.name}</span>
               <span className="text-gray-400">({formatFileSize(uploadedFile.size)})</span>
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            <Upload className="mx-auto h-8 w-8 text-gray-400" />
+          <div className="space-y-2 sm:space-y-3">
+            <Upload className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
             <div>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 {isDragActive
                   ? isDragReject
                     ? 'PDF files only!'
@@ -127,7 +127,7 @@ export function PDFUpload({ onUploadSuccess, onUploadError }: PDFUploadProps) {
       {/* Upload Progress */}
       {isUploading && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="text-gray-600">Uploading...</span>
             <span className="text-gray-500">{uploadProgress}%</span>
           </div>
@@ -142,16 +142,16 @@ export function PDFUpload({ onUploadSuccess, onUploadError }: PDFUploadProps) {
 
       {/* File Actions */}
       {uploadedFile && !isUploading && (
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <FileText className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-700">{uploadedFile.name}</span>
+        <div className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center space-x-2 min-w-0 flex-1">
+            <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
+            <span className="text-xs sm:text-sm text-gray-700 truncate">{uploadedFile.name}</span>
           </div>
           <button
             onClick={removeFile}
-            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
         </div>
       )}
@@ -160,7 +160,7 @@ export function PDFUpload({ onUploadSuccess, onUploadError }: PDFUploadProps) {
       {uploadedFile && !isUploading && (
         <button
           onClick={() => handleUpload(uploadedFile)}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-blue-600 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium"
           disabled={isUploading}
         >
           {isUploading ? 'Uploading...' : 'Upload PDF'}

@@ -1,9 +1,14 @@
+import { Request } from 'express';
+
 // Express Request extensions
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
   };
+  params: any;
+  body: any;
+  query: any;
 }
 
 // PDF related types

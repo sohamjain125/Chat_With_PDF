@@ -1,19 +1,20 @@
 import express from 'express';
 import { upload, handleMulterError } from '../middleware/upload';
+import { authenticateToken, optionalAuth } from '../middleware/auth';
 import { uploadPDF, getPDFs, getPDFById, deletePDF } from '../controllers/pdfController';
 
 const router = express.Router();
 
-// Upload PDF
-router.post('/upload', upload.single('pdf'), handleMulterError, uploadPDF);
+// Upload PDF (requires authentication)
+router.post('/upload', authenticateToken, upload.single('pdf'), handleMulterError, uploadPDF);
 
-// Get all PDFs
-router.get('/', getPDFs);
+// Get all PDFs (optional auth - shows user's PDFs if authenticated, all if not)
+router.get('/', optionalAuth, getPDFs);
 
-// Get PDF by ID
-router.get('/:id', getPDFById);
+// Get PDF by ID (optional auth)
+router.get('/:id', optionalAuth, getPDFById);
 
-// Delete PDF
-router.delete('/:id', deletePDF);
+// Delete PDF (requires authentication)
+router.delete('/:id', authenticateToken, deletePDF);
 
 export default router;

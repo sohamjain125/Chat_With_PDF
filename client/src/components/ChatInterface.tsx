@@ -98,22 +98,22 @@ export function ChatInterface({ pdfId, pdfName }: ChatInterfaceProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Chat Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-gray-200 mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+      <div className="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
+        <div className="flex items-center space-x-3 min-w-0 flex-1">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
             <FileText className="w-5 h-5 text-white" />
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-900">Chat with PDF</h3>
-            <p className="text-sm text-gray-500">{pdfName}</p>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg font-bold text-slate-900 truncate">Chat with PDF</h3>
+            <p className="text-sm text-slate-500 truncate">{pdfName}</p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 flex-shrink-0">
           <button
             onClick={loadChatHistory}
             disabled={isLoadingHistory}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
             title="Refresh chat history"
           >
             <RefreshCw className={`w-4 h-4 ${isLoadingHistory ? 'animate-spin' : ''}`} />
@@ -121,7 +121,7 @@ export function ChatInterface({ pdfId, pdfName }: ChatInterfaceProps) {
           
           <button
             onClick={startNewChat}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
           >
             New Chat
           </button>
@@ -132,31 +132,31 @@ export function ChatInterface({ pdfId, pdfName }: ChatInterfaceProps) {
       <div className="flex-1 overflow-y-auto space-y-6 mb-6 px-2">
         {isLoadingHistory ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-            <span className="ml-2 text-gray-500">Loading chat history...</span>
+            <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
+            <span className="ml-2 text-base text-slate-500">Loading chat history...</span>
           </div>
         ) : messages.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Bot className="w-10 h-10 text-blue-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
+            <h3 className="text-xl font-bold text-slate-900 mb-3">
               Start a conversation
             </h3>
-            <p className="text-gray-600 max-w-md mx-auto">
+            <p className="text-slate-600 max-w-md mx-auto">
               Ask questions about your PDF and get AI-powered answers with context from your document.
             </p>
-            <div className="mt-6 flex items-center justify-center space-x-6 text-sm text-gray-500">
+            <div className="mt-6 flex items-center justify-center space-x-6 text-sm text-slate-500">
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <span>Ask questions</span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                 <span>Get context</span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
                 <span>AI insights</span>
               </div>
             </div>
@@ -172,7 +172,7 @@ export function ChatInterface({ pdfId, pdfName }: ChatInterfaceProps) {
         
         {/* Loading indicator */}
         {isLoading && (
-          <div className="flex items-center space-x-3 text-gray-500 bg-gray-50 rounded-lg p-4">
+          <div className="flex items-center space-x-3 text-slate-500 bg-slate-50 rounded-lg p-4">
             <Loader2 className="w-5 h-5 animate-spin" />
             <span className="text-sm font-medium">AI is thinking...</span>
           </div>
@@ -182,7 +182,7 @@ export function ChatInterface({ pdfId, pdfName }: ChatInterfaceProps) {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 pt-4">
+      <div className="border-t border-slate-200 pt-4">
         <div className="flex space-x-3">
           <div className="flex-1 relative">
             <textarea
@@ -190,11 +190,11 @@ export function ChatInterface({ pdfId, pdfName }: ChatInterfaceProps) {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask a question about your PDF..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
               rows={2}
               disabled={isLoading}
             />
-            <div className="absolute bottom-3 right-3 text-xs text-gray-400">
+            <div className="absolute bottom-3 right-3 text-xs text-slate-400">
               Press Enter to send, Shift+Enter for new line
             </div>
           </div>
